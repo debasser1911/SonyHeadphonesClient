@@ -2,8 +2,6 @@
   <h1 align="center">Sony Headphones Client (Rust Port)</h1>
 
   A pure Rust PC alternative for the mobile-only Sony Headphones app, ported from [Plutoberth/SonyHeadphonesClient](https://github.com/Plutoberth/SonyHeadphonesClient) with added **WH-1000-XM4** support.
-  <br/><br/>
-  <img width="556" src="static/showcase.gif" alt="Program Showcase">
 </p>
 
 ## Table of Contents
