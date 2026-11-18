@@ -1,0 +1,6 @@
+bin.name = "sony-headphones-client"
+args = ["encode-xm4-optimizer", "--optimizing"]
+status.code = 0
+stdout = """
+3e 0c 00 00 00 00 04 84 01 00 01 96 3c
+"""

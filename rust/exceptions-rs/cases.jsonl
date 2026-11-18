@@ -1,0 +1,1 @@
+{"fn":"exceptions_error_kinds","args":[],"error":"crash: windows python lacks os.fork for ctypes isolation; verified natively via cargo test"}

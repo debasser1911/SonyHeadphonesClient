@@ -1,0 +1,23 @@
+[package]
+name = "sony-headphones-client"
+version = "1.3.1"
+edition = "2024"
+publish = false
+description = "Sony Headphones Client in pure Rust with WH-1000-XM3 and WH-1000-XM4 support"
+
+[dependencies]
+bluetooth-connector-rs = { path = "../bluetooth-connector-rs" }
+bluetooth-wrapper-rs = { path = "../bluetooth-wrapper-rs" }
+byte-magic-rs = { path = "../byte-magic-rs" }
+clap = { version = "4.6", features = ["derive"] }
+command-serializer-rs = { path = "../command-serializer-rs" }
+constants-rs = { path = "../constants-rs" }
+eframe = { version = "0.37", default-features = false, features = ["default_fonts", "glow"] }
+exceptions-rs = { path = "../exceptions-rs" }
+headphones-rs = { path = "../headphones-rs" }
+timed-message-queue-rs = { path = "../timed-message-queue-rs" }
+
+[dev-dependencies]
+trycmd = "1"
+
+[workspace]

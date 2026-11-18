@@ -1,0 +1,21 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "../..",
+  "unit": "Client/windows/WindowsBluetoothConnector.cpp",
+  "language": "c",
+  "kind": "c-abi",
+  "crate_name": "bluetooth-connector-rs",
+  "exports": [
+    {
+      "name": "bt_connector_mock_available",
+      "file": "Client/windows/WindowsBluetoothConnector.cpp",
+      "line": 1,
+      "params": [],
+      "returns": "int",
+      "is_async": false,
+      "native_return": "int"
+    }
+  ],
+  "classes": [],
+  "js_only": []
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "../..",
+  "unit": "Client/CommandSerializer.cpp",
+  "language": "c",
+  "kind": "c-abi",
+  "crate_name": "command-serializer-rs",
+  "exports": [
+    {
+      "name": "serializer_max_steps_xm3",
+      "file": "Client/CommandSerializer.h",
+      "line": 1,
+      "params": [],
+      "returns": "int",
+      "is_async": false,
+      "native_return": "int"
+    }
+  ],
+  "classes": [],
+  "js_only": []
+}

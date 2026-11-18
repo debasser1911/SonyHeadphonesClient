@@ -1,0 +1,6 @@
+bin.name = "sony-headphones-client"
+args = ["encode-nc-asm", "--model", "xm3", "--level", "20"]
+status.code = 1
+stderr = """
+error: Exceeded max steps
+"""

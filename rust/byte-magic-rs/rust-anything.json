@@ -1,0 +1,29 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "../..",
+  "unit": "Client/ByteMagic.h",
+  "language": "c",
+  "kind": "c-abi",
+  "crate_name": "byte-magic-rs",
+  "exports": [
+    {
+      "name": "byteOrderSwap",
+      "file": "Client/ByteMagic.h",
+      "line": 11,
+      "params": [
+        {
+          "name": "num",
+          "ts_type": "int",
+          "optional": false,
+          "rest": false,
+          "native_type": "unsigned int"
+        }
+      ],
+      "returns": "int",
+      "is_async": false,
+      "native_return": "unsigned int"
+    }
+  ],
+  "classes": [],
+  "js_only": []
+}

@@ -1,0 +1,17 @@
+[package]
+name = "headphones-rs"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+bluetooth-connector-rs = { path = "../bluetooth-connector-rs" }
+bluetooth-wrapper-rs = { path = "../bluetooth-wrapper-rs" }
+command-serializer-rs = { path = "../command-serializer-rs" }
+constants-rs = { path = "../constants-rs" }
+exceptions-rs = { path = "../exceptions-rs" }
+
+[workspace]

@@ -1,0 +1,84 @@
+{
+  "schema": "rust-anything/front-door@1",
+  "name": "sony-headphones-client",
+  "commands": [
+    "models",
+    "encode-nc-asm",
+    "encode-vpt",
+    "encode-xm4-s2c",
+    "encode-xm4-s2c-options",
+    "encode-xm4-optimizer",
+    "encode-multipoint",
+    "decode-frame",
+    "mac-to-int",
+    "simulate-xm4",
+    "gui"
+  ],
+  "units": [
+    {
+      "name": "constants",
+      "crate": "constants-rs",
+      "path": "../constants-rs",
+      "commands": ["models"],
+      "switch": "RUST_ANYTHING_UNIT_CONSTANTS"
+    },
+    {
+      "name": "exceptions",
+      "crate": "exceptions-rs",
+      "path": "../exceptions-rs",
+      "commands": [],
+      "switch": "RUST_ANYTHING_UNIT_EXCEPTIONS"
+    },
+    {
+      "name": "timed-message-queue",
+      "crate": "timed-message-queue-rs",
+      "path": "../timed-message-queue-rs",
+      "commands": [],
+      "switch": "RUST_ANYTHING_UNIT_TIMED_MESSAGE_QUEUE"
+    },
+    {
+      "name": "byte-magic",
+      "crate": "byte-magic-rs",
+      "path": "../byte-magic-rs",
+      "commands": ["mac-to-int"],
+      "switch": "RUST_ANYTHING_UNIT_BYTE_MAGIC"
+    },
+    {
+      "name": "command-serializer",
+      "crate": "command-serializer-rs",
+      "path": "../command-serializer-rs",
+      "commands": [
+        "encode-nc-asm",
+        "encode-vpt",
+        "encode-xm4-s2c",
+        "encode-xm4-s2c-options",
+        "encode-xm4-optimizer",
+        "encode-multipoint",
+        "decode-frame"
+      ],
+      "switch": "RUST_ANYTHING_UNIT_COMMAND_SERIALIZER"
+    },
+    {
+      "name": "bluetooth-connector",
+      "crate": "bluetooth-connector-rs",
+      "path": "../bluetooth-connector-rs",
+      "commands": [],
+      "switch": "RUST_ANYTHING_UNIT_BLUETOOTH_CONNECTOR"
+    },
+    {
+      "name": "bluetooth-wrapper",
+      "crate": "bluetooth-wrapper-rs",
+      "path": "../bluetooth-wrapper-rs",
+      "commands": [],
+      "switch": "RUST_ANYTHING_UNIT_BLUETOOTH_WRAPPER"
+    },
+    {
+      "name": "headphones",
+      "crate": "headphones-rs",
+      "path": "../headphones-rs",
+      "commands": ["simulate-xm4", "gui"],
+      "switch": "RUST_ANYTHING_UNIT_HEADPHONES"
+    }
+  ],
+  "lifted": true
+}

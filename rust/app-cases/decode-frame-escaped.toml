@@ -1,0 +1,6 @@
+bin.name = "sony-headphones-client"
+args = ["decode-frame", "--hex", "3e 0e 00 00 00 00 15 3d 2c 01 00 01 31 31 3a 32 32 3a 33 33 3a 34 34 3a 35 35 3a 36 36 ed 3c"]
+status.code = 0
+stdout = """
+data_type=DataMdrNo2 seq=0 payload=3c 01 00 01 31 31 3a 32 32 3a 33 33 3a 34 34 3a 35 35 3a 36 36
+"""

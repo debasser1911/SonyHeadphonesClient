@@ -1,0 +1,21 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "../..",
+  "unit": "Client/TimedMessageQueue.h",
+  "language": "c",
+  "kind": "c-abi",
+  "crate_name": "timed-message-queue-rs",
+  "exports": [
+    {
+      "name": "tmq_default_duration_ms",
+      "file": "Client/TimedMessageQueue.h",
+      "line": 1,
+      "params": [],
+      "returns": "int",
+      "is_async": false,
+      "native_return": "uint64_t"
+    }
+  ],
+  "classes": [],
+  "js_only": []
+}

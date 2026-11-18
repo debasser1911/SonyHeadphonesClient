@@ -1,0 +1,18 @@
+[package]
+name = "bluetooth-connector-rs"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+byte-magic-rs = { path = "../byte-magic-rs" }
+constants-rs = { path = "../constants-rs" }
+exceptions-rs = { path = "../exceptions-rs" }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Devices_Bluetooth", "Win32_Networking_WinSock"] }
+
+[workspace]

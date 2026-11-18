@@ -1,0 +1,6 @@
+bin.name = "sony-headphones-client"
+args = ["encode-xm4-s2c", "--active"]
+status.code = 0
+stdout = """
+3e 0c 00 00 00 00 04 f8 05 01 01 0f 3c
+"""

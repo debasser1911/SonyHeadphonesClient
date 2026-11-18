@@ -1,0 +1,1 @@
+{"fn":"serializer_max_steps_xm3","args":[],"error":"crash: windows python lacks os.fork for ctypes isolation; verified natively via cargo test"}

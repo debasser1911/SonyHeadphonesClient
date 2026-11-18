@@ -1,0 +1,6 @@
+bin.name = "sony-headphones-client"
+args = ["mac-to-int", "--mac", "bad"]
+status.code = 1
+stderr = """
+error: Invalid MAC address size (bad): 3 != 17
+"""

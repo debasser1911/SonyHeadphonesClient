@@ -1,0 +1,1 @@
+{"fn":"headphones_xm4_max_steps","args":[],"error":"crash: windows python lacks os.fork for ctypes isolation; verified natively via cargo test"}

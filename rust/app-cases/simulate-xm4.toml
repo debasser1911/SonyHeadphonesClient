@@ -1,0 +1,6 @@
+bin.name = "sony-headphones-client"
+args = ["simulate-xm4"]
+status.code = 0
+stdout = """
+model=WH-1000XM4 max_asm=20 asm_level=20 voice_focus=true s2c=Active optimizer=Optimizing multipoint=(Laptop, )
+"""

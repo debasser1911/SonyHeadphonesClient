@@ -1,0 +1,21 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "../..",
+  "unit": "Client/Exceptions.h",
+  "language": "c",
+  "kind": "c-abi",
+  "crate_name": "exceptions-rs",
+  "exports": [
+    {
+      "name": "exceptions_error_kinds",
+      "file": "Client/Exceptions.h",
+      "line": 1,
+      "params": [],
+      "returns": "int",
+      "is_async": false,
+      "native_return": "int"
+    }
+  ],
+  "classes": [],
+  "js_only": []
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "../..",
+  "unit": "Client/BluetoothWrapper.cpp",
+  "language": "c",
+  "kind": "c-abi",
+  "crate_name": "bluetooth-wrapper-rs",
+  "exports": [
+    {
+      "name": "bt_wrapper_max_msg_size",
+      "file": "Client/BluetoothWrapper.cpp",
+      "line": 1,
+      "params": [],
+      "returns": "int",
+      "is_async": false,
+      "native_return": "int"
+    }
+  ],
+  "classes": [],
+  "js_only": []
+}

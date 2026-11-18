@@ -1,0 +1,6 @@
+bin.name = "sony-headphones-client"
+args = ["encode-nc-asm", "--model", "xm4", "--level", "20", "--voice"]
+status.code = 0
+stdout = """
+3e 0c 00 00 00 00 08 68 02 11 01 00 01 01 14 a6 3c
+"""

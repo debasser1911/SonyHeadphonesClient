@@ -1,0 +1,21 @@
+{
+  "schema": "rust-anything/bridge@1",
+  "root": "../..",
+  "unit": "Client/Constants.h",
+  "language": "c",
+  "kind": "c-abi",
+  "crate_name": "constants-rs",
+  "exports": [
+    {
+      "name": "constants_max_steps_xm4",
+      "file": "Client/Constants.h",
+      "line": 1,
+      "params": [],
+      "returns": "int",
+      "is_async": false,
+      "native_return": "int"
+    }
+  ],
+  "classes": [],
+  "js_only": []
+}

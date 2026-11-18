@@ -1,0 +1,7 @@
+{
+  "schema": "rust-anything/app-cases@1",
+  "name": "sony-headphones-client",
+  "run": [
+    "rust/app/target/debug/sony-headphones-client.exe"
+  ]
+}

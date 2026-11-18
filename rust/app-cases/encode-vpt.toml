@@ -1,0 +1,6 @@
+bin.name = "sony-headphones-client"
+args = ["encode-vpt", "--mode", "vpt", "--preset", "3"]
+status.code = 0
+stdout = """
+3e 0c 00 00 00 00 03 48 01 03 5b 3c
+"""

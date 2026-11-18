@@ -1,0 +1,1 @@
+{"fn":"tmq_default_duration_ms","args":[],"error":"crash: windows python lacks os.fork for ctypes isolation; verified natively via cargo test"}
