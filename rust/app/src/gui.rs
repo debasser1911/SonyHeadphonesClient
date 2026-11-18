@@ -1,6 +1,7 @@
 use std::sync::mpsc::{self, Receiver};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::time::{Duration, Instant};
 
 use bluetooth_connector_rs::port::{BluetoothDevice, IBluetoothConnector, MockBluetoothConnector};
 use bluetooth_wrapper_rs::port::BluetoothWrapper;
@@ -29,6 +30,26 @@ const SOUND_POS_LABELS: [&str; 6] = [
     "Rear Right",
 ];
 const VPT_LABELS: [&str; 5] = ["Off", "Outdoor Festival", "Arena", "Concert Hall", "Club"];
+const EQ_PRESETS: [(u8, &str); 10] = [
+    (0x00, "Off"),
+    (0x10, "Bright"),
+    (0x11, "Excited"),
+    (0x12, "Mellow"),
+    (0x13, "Relaxed"),
+    (0x14, "Vocal"),
+    (0x15, "Treble Boost"),
+    (0x16, "Bass Boost"),
+    (0x17, "Speech"),
+    (0xFF, "Custom"),
+];
+const EQ_BAND_LABELS: [&str; 6] = [
+    "Clear Bass",
+    "400 Hz",
+    "1 kHz",
+    "2.5 kHz",
+    "6.3 kHz",
+    "16 kHz",
+];
 
 const ACCENT_BLUE: egui::Color32 = egui::Color32::from_rgb(76, 148, 255);
 const STATUS_GREEN: egui::Color32 = egui::Color32::from_rgb(72, 199, 142);
@@ -83,7 +104,17 @@ struct SonyHeadphonesApp {
     s2c_voice: bool,
     mp_connect_target: usize,
     force_xm4_multipoint: bool,
+    eq_preset: u8,
+    eq_bands: [i8; 6],
+    dsee_enabled: bool,
     simulator_mode: bool,
+    cached_model: HeadphoneModel,
+    cached_caps: u32,
+    cached_max_steps: i32,
+    cached_opt_state: OptimizerState,
+    cached_devices: Vec<BluetoothDevice>,
+    cached_connected_indices: (usize, usize),
+    last_edit_at: Option<Instant>,
 }
 
 impl SonyHeadphonesApp {
@@ -114,7 +145,17 @@ impl SonyHeadphonesApp {
             s2c_voice: false,
             mp_connect_target: 0,
             force_xm4_multipoint: false,
+            eq_preset: 0,
+            eq_bands: [0; 6],
+            dsee_enabled: false,
             simulator_mode: false,
+            cached_model: HeadphoneModel::Generic,
+            cached_caps: 0,
+            cached_max_steps: 19,
+            cached_opt_state: OptimizerState::Idle,
+            cached_devices: Vec::new(),
+            cached_connected_indices: (0, 0),
+            last_edit_at: None,
         };
         app.start_discovery();
         app
@@ -245,7 +286,20 @@ impl SonyHeadphonesApp {
             self.send_rx = None;
             if let Err(e) = res {
                 self.push_error(e, "Disconnected due to: ");
+            } else {
+                self.refresh_cached_snapshot();
             }
+        }
+    }
+
+    fn refresh_cached_snapshot(&mut self) {
+        if let Ok(hp) = self.headphones.try_lock() {
+            self.cached_model = hp.model();
+            self.cached_caps = hp.capabilities();
+            self.cached_max_steps = i32::from(hp.max_asm_steps());
+            self.cached_opt_state = hp.optimizer_state.current;
+            self.cached_devices = hp.saved_devices.clone();
+            self.cached_connected_indices = hp.get_connected_device_indices();
         }
     }
 
@@ -266,6 +320,15 @@ impl SonyHeadphonesApp {
             self.s2c_sens = ((opts >> 16) & 0xff) as u8;
             self.s2c_voice = ((opts >> 8) & 0xff) != 0;
             self.s2c_off_time = (opts & 0xff) as u8;
+            self.eq_preset = hp.eq_preset.current;
+            self.eq_bands = hp.eq_bands.current;
+            self.dsee_enabled = hp.dsee_enabled.current;
+            self.cached_model = hp.model();
+            self.cached_caps = hp.capabilities();
+            self.cached_max_steps = i32::from(hp.max_asm_steps());
+            self.cached_opt_state = hp.optimizer_state.current;
+            self.cached_devices = hp.saved_devices.clone();
+            self.cached_connected_indices = hp.get_connected_device_indices();
         }
     }
 
@@ -355,11 +418,8 @@ impl SonyHeadphonesApp {
     fn draw_device_discovery(&mut self, ui: &mut egui::Ui) {
         section_card(ui, |ui| {
             if self.bt.is_connected() {
-                let (model, caps) = self
-                    .headphones
-                    .lock()
-                    .map(|hp| (hp.model(), hp.capabilities()))
-                    .unwrap_or((HeadphoneModel::Generic, 0));
+                self.refresh_cached_snapshot();
+                let (model, caps) = (self.cached_model, self.cached_caps);
                 let (name, mac) = self.connected_device.as_ref().map_or_else(
                     || ("Headphones".to_owned(), String::new()),
                     |d| (d.name.clone(), d.mac.clone()),
@@ -511,18 +571,12 @@ impl SonyHeadphonesApp {
     }
 
     fn draw_controls(&mut self, ui: &mut egui::Ui) {
-        let (caps, max_steps, opt_state, devices, (d1, d2)) = {
-            let Ok(hp) = self.headphones.lock() else {
-                return;
-            };
-            (
-                hp.capabilities(),
-                i32::from(hp.max_asm_steps()),
-                hp.optimizer_state.current,
-                hp.saved_devices.clone(),
-                hp.get_connected_device_indices(),
-            )
-        };
+        self.refresh_cached_snapshot();
+        let caps = self.cached_caps;
+        let max_steps = self.cached_max_steps;
+        let opt_state = self.cached_opt_state;
+        let devices = self.cached_devices.clone();
+        let (d1, d2) = self.cached_connected_indices;
 
         if caps & device_capabilities::NC_ASM != 0 {
             self.draw_nc_asm_section(ui, max_steps);
@@ -543,6 +597,9 @@ impl SonyHeadphonesApp {
         if caps & device_capabilities::VPT != 0 {
             self.draw_vpt_section(ui);
         }
+
+        self.draw_eq_section(ui);
+        self.draw_dsee_section(ui);
 
         self.flush_headphone_changes(ui);
     }
@@ -847,45 +904,124 @@ impl SonyHeadphonesApp {
         });
     }
 
-    fn flush_headphone_changes(&mut self, ui: &mut egui::Ui) {
-        if let Ok(mut hp) = self.headphones.lock() {
-            hp.ambient_sound_control.desired = self.ambient_sound_control;
-            hp.asm_level.desired = self.asm_level;
-            hp.focus_on_voice.desired = self.focus_on_voice;
-            hp.surround_position.desired = SOUND_POSITION_PRESET_ARRAY[self.sound_position_idx];
-            hp.vpt_type.desired = self.vpt_idx as i32;
-            hp.speak_to_chat.desired = if self.s2c_enabled {
-                S2cToggle::Active
-            } else {
-                S2cToggle::Inactive
-            };
-            hp.set_s2c_options(self.s2c_sens, self.s2c_voice, self.s2c_off_time);
+    fn draw_eq_section(&mut self, ui: &mut egui::Ui) {
+        section_card(ui, |ui| {
+            ui.horizontal(|ui| {
+                ui.label(
+                    egui::RichText::new("Equalizer (5-Band + Clear Bass)")
+                        .strong()
+                        .size(15.0),
+                );
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if ui.small_button("Reset Flat").clicked() {
+                        self.eq_bands = [0; 6];
+                        self.eq_preset = 0xFF;
+                    }
+                });
+            });
+            ui.add_space(4.0);
 
-            if self.send_rx.is_some() {
-                ui.horizontal(|ui| {
-                    ui.spinner();
+            let preset_name = EQ_PRESETS
+                .iter()
+                .find(|(id, _)| *id == self.eq_preset)
+                .map_or("Custom", |(_, name)| *name);
+            egui::ComboBox::from_label("Preset")
+                .selected_text(preset_name)
+                .show_ui(ui, |ui| {
+                    for (id, name) in EQ_PRESETS {
+                        ui.selectable_value(&mut self.eq_preset, id, name);
+                    }
+                });
+
+            ui.add_space(4.0);
+            for (idx, label) in EQ_BAND_LABELS.iter().enumerate() {
+                if ui
+                    .add(egui::Slider::new(&mut self.eq_bands[idx], -10..=10).text(*label))
+                    .changed()
+                {
+                    self.eq_preset = 0xFF;
+                }
+            }
+        });
+    }
+
+    fn draw_dsee_section(&mut self, ui: &mut egui::Ui) {
+        section_card(ui, |ui| {
+            ui.horizontal(|ui| {
+                ui.vertical(|ui| {
+                    ui.label(egui::RichText::new("DSEE Extreme").strong().size(15.0));
                     ui.label(
-                        egui::RichText::new("Applying changes...")
+                        egui::RichText::new("Upscales compressed audio sources in real time.")
                             .small()
                             .color(STATUS_MUTED),
                     );
                 });
-            } else if hp.is_changed() {
-                let bt = Arc::clone(&self.bt);
-                let hp_arc = Arc::clone(&self.headphones);
-                let (tx, rx) = mpsc::channel();
-                thread::spawn(move || {
-                    let res = hp_arc
-                        .lock()
-                        .map_err(|_| {
-                            HeadphonesError::runtime("Headphones mutex poisoned".to_string())
-                        })
-                        .and_then(|mut g| g.set_changes(&bt));
-                    let _ = tx.send(res);
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.checkbox(&mut self.dsee_enabled, "Enabled");
                 });
-                self.send_rx = Some(rx);
-            }
+            });
+        });
+    }
+
+    fn flush_headphone_changes(&mut self, ui: &mut egui::Ui) {
+        if self.send_rx.is_some() {
+            ui.horizontal(|ui| {
+                ui.spinner();
+                ui.label(
+                    egui::RichText::new("Applying changes...")
+                        .small()
+                        .color(STATUS_MUTED),
+                );
+            });
+            return;
         }
+
+        let Ok(mut hp) = self.headphones.try_lock() else {
+            return;
+        };
+        hp.ambient_sound_control.desired = self.ambient_sound_control;
+        hp.asm_level.desired = self.asm_level;
+        hp.focus_on_voice.desired = self.focus_on_voice;
+        hp.surround_position.desired = SOUND_POSITION_PRESET_ARRAY[self.sound_position_idx];
+        hp.vpt_type.desired = self.vpt_idx as i32;
+        hp.speak_to_chat.desired = if self.s2c_enabled {
+            S2cToggle::Active
+        } else {
+            S2cToggle::Inactive
+        };
+        hp.set_s2c_options(self.s2c_sens, self.s2c_voice, self.s2c_off_time);
+        hp.eq_preset.desired = self.eq_preset;
+        hp.eq_bands.desired = self.eq_bands;
+        hp.dsee_enabled.desired = self.dsee_enabled;
+
+        if !hp.is_changed() {
+            self.last_edit_at = None;
+            return;
+        }
+
+        if ui.input(|i| i.pointer.any_down()) {
+            let now = Instant::now();
+            let last = *self.last_edit_at.get_or_insert(now);
+            if now.duration_since(last) < Duration::from_millis(150) {
+                ui.ctx().request_repaint_after(Duration::from_millis(50));
+                return;
+            }
+            self.last_edit_at = Some(now);
+        } else {
+            self.last_edit_at = None;
+        }
+
+        let bt = Arc::clone(&self.bt);
+        let hp_arc = Arc::clone(&self.headphones);
+        let (tx, rx) = mpsc::channel();
+        thread::spawn(move || {
+            let res = hp_arc
+                .lock()
+                .map_err(|_| HeadphonesError::runtime("Headphones mutex poisoned".to_string()))
+                .and_then(|mut g| g.set_changes(&bt));
+            let _ = tx.send(res);
+        });
+        self.send_rx = Some(rx);
     }
 }
 
@@ -1079,6 +1215,31 @@ fn build_xm4_simulator_connector() -> MockBluetoothConnector {
         0,
     ) {
         mock.push_incoming(nc_asm);
+    }
+    if let Ok(eq_ret) = package_data_for_bt(
+        &[
+            CommandType::EqRet as u8,
+            0x01,
+            0x00,
+            0x06,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+        ],
+        DataType::DataMdr,
+        0,
+    ) {
+        mock.push_incoming(eq_ret);
+    }
+    if let Ok(dsee_ret) = package_data_for_bt(
+        &[CommandType::DseeRet as u8, 0x02, 0x00, 0x00],
+        DataType::DataMdr,
+        0,
+    ) {
+        mock.push_incoming(dsee_ret);
     }
     for _ in 0..64 {
         if let Ok(ack) = package_data_for_bt(&[], DataType::Ack, 1) {

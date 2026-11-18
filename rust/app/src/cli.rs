@@ -322,7 +322,7 @@ fn simulate_xm4_session() -> Result<String, String> {
         q.push_back(cap_reply);
         q.push_back(package_data_for_bt(&[], DataType::Ack, 1).map_err(|e| e.to_string())?);
         q.push_back(dev_reply);
-        for _ in 0..3 {
+        for _ in 0..5 {
             q.push_back(package_data_for_bt(&[], DataType::Ack, 0).map_err(|e| e.to_string())?);
         }
     }

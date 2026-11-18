@@ -158,3 +158,17 @@ pub fn serialize_multi_point_command(cmd: MultiPointCommand, mac: &str) -> Vec<u
         .chain(mac.bytes())
         .collect()
 }
+pub fn serialize_eq_preset(preset: u8) -> Vec<u8> {
+    vec![CommandType::EqSet as u8, 0x01, preset, 0x00]
+}
+pub fn serialize_eq_manual(bands: &[i8; 6]) -> Vec<u8> {
+    let mut out = Vec::with_capacity(10);
+    out.extend_from_slice(&[CommandType::EqSet as u8, 0x01, 0xFF, 0x06]);
+    for &b in bands {
+        out.push((b.clamp(-10, 10) + 10) as u8);
+    }
+    out
+}
+pub fn serialize_dsee_setting(enabled: bool) -> Vec<u8> {
+    vec![CommandType::DseeSet as u8, 0x02, 0x00, u8::from(enabled)]
+}

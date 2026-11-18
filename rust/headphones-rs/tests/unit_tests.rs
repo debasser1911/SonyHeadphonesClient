@@ -50,7 +50,7 @@ fn xm4_capability_discovery_nc_asm_20_s2c_optimizer_and_multipoint() {
         q.push_back(cap_reply);
         q.push_back(package_data_for_bt(&[], DataType::Ack, 1).unwrap());
         q.push_back(dev_reply);
-        for _ in 0..3 {
+        for _ in 0..5 {
             q.push_back(package_data_for_bt(&[], DataType::Ack, 0).unwrap());
         }
     }

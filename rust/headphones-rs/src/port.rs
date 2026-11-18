@@ -57,6 +57,9 @@ pub struct Headphones {
     pub saved_devices: Vec<BluetoothDevice>,
     pub dev1: Property<usize>,
     pub dev2: Property<usize>,
+    pub eq_preset: Property<u8>,
+    pub eq_bands: Property<[i8; 6]>,
+    pub dsee_enabled: Property<bool>,
 }
 
 impl Default for Headphones {
@@ -93,6 +96,9 @@ impl Headphones {
             }],
             dev1: Property::symmetric(0),
             dev2: Property::symmetric(0),
+            eq_preset: Property::symmetric(0),
+            eq_bands: Property::symmetric([0; 6]),
+            dsee_enabled: Property::symmetric(false),
         }
     }
 
@@ -140,7 +146,10 @@ impl Headphones {
                 && self.speak_to_chat.is_fulfilled()
                 && self.s2c_options.is_fulfilled()
                 && self.dev1.is_fulfilled()
-                && self.dev2.is_fulfilled())
+                && self.dev2.is_fulfilled()
+                && self.eq_preset.is_fulfilled()
+                && self.eq_bands.is_fulfilled()
+                && self.dsee_enabled.is_fulfilled())
     }
 
     pub fn set_changes(&mut self, conn: &BluetoothWrapper) -> Result<(), HeadphonesError> {
@@ -214,6 +223,19 @@ impl Headphones {
         }
         Self::sync_slot(conn, &self.saved_devices, &mut self.dev1)?;
         Self::sync_slot(conn, &self.saved_devices, &mut self.dev2)?;
+        if !(self.eq_preset.is_fulfilled() && self.eq_bands.is_fulfilled()) {
+            let cmd = if self.eq_preset.desired == 0xFF {
+                serialize_eq_manual(&self.eq_bands.desired)
+            } else {
+                serialize_eq_preset(self.eq_preset.desired)
+            };
+            conn.send_command(&cmd)?;
+            self.eq_preset.fulfill();
+            self.eq_bands.fulfill();
+        }
+        send_if_dirty(conn, &mut self.dsee_enabled, |&en| {
+            serialize_dsee_setting(en)
+        })?;
         self.apply_pending(conn);
         Ok(())
     }
@@ -266,6 +288,8 @@ impl Headphones {
                 [CommandType::S2cOptionsQuery as u8, 0x05],
             ),
             (DataType::DataMdr, [CommandType::NcAsmQuery as u8, 0x02]),
+            (DataType::DataMdr, [CommandType::EqGet as u8, 0x01]),
+            (DataType::DataMdr, [CommandType::DseeGet as u8, 0x02]),
         ];
         for (dtype, payload) in queries {
             conn.send_command_with_type(&payload, dtype)?;
@@ -327,6 +351,19 @@ impl Headphones {
                 self.focus_on_voice.set_state(b[6] == AsmId::Voice as u8);
                 self.asm_level
                     .set_state(i32::from(b[7] as i8).clamp(0, i32::from(self.max_asm_steps())));
+            }
+            CommandType::EqRet | CommandType::EqNotify if b.len() >= 3 => {
+                self.eq_preset.set_state(b[2]);
+                if b.len() >= 10 && b[3] == 0x06 {
+                    let mut bands = [0i8; 6];
+                    for (slot, &raw) in bands.iter_mut().zip(&b[4..10]) {
+                        *slot = (i16::from(raw) - 10).clamp(-10, 10) as i8;
+                    }
+                    self.eq_bands.set_state(bands);
+                }
+            }
+            CommandType::DseeRet | CommandType::DseeNotify if b.len() >= 4 => {
+                self.dsee_enabled.set_state(b[3] != 0);
             }
             _ => {}
         }
