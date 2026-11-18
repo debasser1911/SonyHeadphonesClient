@@ -1,141 +1,98 @@
-# Archival
+<p align="center">
+  <h1 align="center">Sony Headphones Client (Rust Port)</h1>
 
-This project is now archived. Thanks to all the users - I hope that you had as much fun using it as I had making it :)
-
-I was very happy to see that this program, originally created out of my own need, turned out to be useful to so many people.
-
-The app will, of course, continue to work indefinitely for the devices it supports.
-
-
-There are some forks that add support for other devices, like WF-1000XM5 or WH-1000XM4 - they might work, but I haven't tested or reviewed them myself. You're welcome to try those if your device is unsupported.
-
-# Archived Page
-<p class="aligncenter">
-  <a href="https://github.com/Plutoberth/SonyHeadphonesClient">
-    <!-- img src="" alt="Logo" width="80" height="80"-->
-  </a>
-
-  <h1 align="center">Sony Headphones Client</h1>
-
-  This project features a PC alternative for the mobile-only Sony Headphones app.
+  A pure Rust PC alternative for the mobile-only Sony Headphones app, ported from [Plutoberth/SonyHeadphonesClient](https://github.com/Plutoberth/SonyHeadphonesClient) with added **WH-1000-XM4** support.
   <br/><br/>
-  <img width="556" src="static/showcase.gif" alt="Program Showcase"><p> <br/>
-
-  [![macOS](https://github.com/plutoberth/sonyheadphonesclient/actions/workflows/xcodebuild.yml/badge.svg)](https://github.com/Plutoberth/SonyHeadphonesClient/actions/workflows/xcodebuild.yml)
-  [![Linux & Windows](https://github.com/plutoberth/sonyheadphonesclient/actions/workflows/cmake.yml/badge.svg)](https://github.com/Plutoberth/SonyHeadphonesClient/actions/workflows/cmake.yml)
-  [![Github all releases](https://img.shields.io/github/downloads/Plutoberth/SonyHeadphonesClient/total.svg)](https://GitHub.com/Plutoberth/SonyHeadphonesClient/releases/)
-  [![Donate](static/badge.svg)](https://paypal.me/plutoberth)
-  <br/>
+  <img width="556" src="static/showcase.gif" alt="Program Showcase">
 </p>
 
-<!-- TABLE OF CONTENTS -->
 ## Table of Contents
 
 * [Disclaimer](#disclaimer)
-* [Download](#download)
-* [Motivation](#motivation)
+* [What Changed in This Fork](#what-changed-in-this-fork)
 * [Features](#features)
-* [Supported Platforms](#supported-platforms-and-headsets)
-* [For Developers](#for-developers)
-* [Contributors](#contributors)
+* [Supported Platforms And Headsets](#supported-platforms-and-headsets)
+* [Building & Running](#building--running)
+* [Architecture](#architecture)
+* [Credits & Contributors](#credits--contributors)
 * [License](#license)
 
-<!-- disclaimer -->
 ## Disclaimer
 
 ### THIS PROGRAM IS NOT AFFILIATED WITH SONY. YOU ARE RESPONSIBLE FOR ANY DAMAGE THAT MAY OCCUR WHILE USING THIS PROGRAM.
 
-## Download
+## What Changed in This Fork
 
-You can download compiled versions of the client from the [releases page](https://github.com/Plutoberth/SonyHeadphonesClient/releases).
-
-**Note:** If you're getting an error like `VCRUNTIME140_1.dll was not found`, you need to install the `Microsoft VC++ Redistributable`.
-
-## Motivation
-
-I recently bought the WH-1000-XM3s, and I was annoyed by the fact that I couldn't change their settings while using my PC.
-So I reverse-engineered the application (for intercompatibility purposes, of course), defined the protocol, and created with an alternative application with [Mr-M33533K5](https://github.com/Mr-M33533K5).
+- **Ported from C++ to pure Rust** under [`rust/`](rust/).
+- Replaced the Dear ImGui + CMake/MSVC/Xcode build with [`eframe`](https://crates.io/crates/eframe)/`egui` (`glow`) and Cargo.
+- Added **WH-1000-XM4** protocol support (20-step Ambient Sound Control, Speak-to-Chat, Multipoint, and Optimizer) alongside **WH-1000-XM3**.
+- Added a `clap`-based CLI alongside the desktop GUI (`cargo run -- --help`).
 
 ## Features
 
-- [x] Ambient Sound Control
+- [x] Ambient Sound Control (XM3 19-step & XM4 20-step)
 - [x] Disabling noise cancelling
-- [x] Virtual Sound - VPT and Sound Position
-- [ ] Display battery life and fetch existing settings from device
-- [ ] Equalizer
+- [x] Virtual Sound — VPT and Sound Position
+- [x] WH-1000-XM4 Speak-to-Chat, Multipoint, and Optimizer
+- [x] Desktop GUI (`eframe`/`egui`) & CLI subcommands (`gui`, `models`, packet encoding/simulation)
 
 ## Supported Platforms And Headsets
 
-* WH-1000-XM3: Fully works and supported
-* [WH-1000-XM4](https://github.com/Plutoberth/SonyHeadphonesClient/issues/29#issuecomment-792459162): Partially works, more work is needed
-* [MDR-XB950BT](https://github.com/Plutoberth/SonyHeadphonesClient/issues/29#issuecomment-804292227): Fully works
-* And more! Check out [Headset Reports](https://github.com/Plutoberth/SonyHeadphonesClient/issues/29)
+* **WH-1000-XM3**: Supported
+* **WH-1000-XM4**: Supported
+* **Windows**: Supported (native Winsock/Bluetooth RFCOMM via `windows-sys`)
+* **Linux / macOS**: Not yet implemented in the Rust backend (`IBluetoothConnector` trait in `rust/bluetooth-connector-rs` is extensible for future backends)
 
-#### **Please report about your experiences using other Sony headsets in the [Headset Reports](https://github.com/Plutoberth/SonyHeadphonesClient/issues/29) issue.**
+## Building & Running
 
-- [x] Windows
-- [x] Linux
-- [x] macOS
-- [ ] ~~TempleOS~~
+Requires a working [Rust toolchain](https://rustup.rs/) (edition 2024).
 
-## For Developers
-
-```git clone --recurse-submodules https://github.com/Plutoberth/SonyHeadphonesClient.git```
-
-Issue this incantation to fix submodule issues:
 ```sh
-git submodule sync
-git submodule update
+git clone https://github.com/debasser1911/SonyHeadphonesClient.git
+cd SonyHeadphonesClient/rust/app
+cargo build --release
+cargo run
 ```
 
-### Protocol Information
+To run the test suite:
 
-Some enums and data are present in the code. The rest has to be obtained either statically or dynamically.
-
-Sniffing messages - See [this helpful comment](https://github.com/Plutoberth/SonyHeadphonesClient/pull/36#issuecomment-795633877) by @guilhermealbm.
-
-### Compiling
-
-#### Windows
-Install [cmake](https://cmake.org/download/) (3.29.3 works) and install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/) the C++ components:
-* MSVC - VS 2022 C++ x64/x86 build tools
-* Windows SDK
-
-From within Visual Studio Run the `Tools --> Command Line --> Developer Command Prompt` and then:
-```
-cd Client
-mkdir build
-cd build
-cmake ..
-cmake --build .
+```sh
+cd rust/app
+cargo test
 ```
 
-#### Linux
+For CLI usage:
 
-Debian / Ubuntu:
-
-```bash
-sudo apt install libbluetooth-dev libglew-dev libglfw3-dev libdbus-1-dev
+```sh
+cargo run -- --help
 ```
 
-Fedora:
-```bash
-sudo dnf install bluez-libs-devel glew-devel glfw-devel dbus-devel
-```
+## Architecture
 
-#### macOS
+See [`rust/MAP.md`](rust/MAP.md) for the full crate breakdown:
 
-Use the provided xcodeproj file.
+| Crate | Purpose |
+| --- | --- |
+| `rust/constants-rs` | Protocol constants, XM3/XM4 enums & capabilities |
+| `rust/exceptions-rs` | `HeadphonesError` error types |
+| `rust/timed-message-queue-rs` | Expiring UI message queue |
+| `rust/byte-magic-rs` | Big-endian serialization & MAC address conversion |
+| `rust/bluetooth-connector-rs` | `IBluetoothConnector` trait, Win32 RFCOMM backend & mock |
+| `rust/command-serializer-rs` | MDR v1 framing, checksums & XM3/XM4 command serializers |
+| `rust/bluetooth-wrapper-rs` | Bi-directional framing & ACK synchronization |
+| `rust/headphones-rs` | WH-1000-XM3 & WH-1000-XM4 state machine |
+| `rust/app` | `sony-headphones-client` binary (`eframe`/`egui` GUI + `clap` CLI) |
 
-## Contributors
+## Credits & Contributors
 
-* [Plutoberth](https://github.com/Plutoberth) - Initial Work and Windows Version
+Ported to Rust in this fork; original C++ reverse-engineering and client by:
+
+* [Plutoberth](https://github.com/Plutoberth) - Original Work and Windows Version
 * [Mr-M33533K5](https://github.com/Mr-M33533K5) - BT Interface and Other Help
 * [semvis123](https://github.com/semvis123) - macOS Version
 * [jimzrt](https://github.com/jimzrt) - Linux Version
 * [guilhermealbm](https://github.com/guilhermealbm) - Noise Cancelling Switch
 
-<!-- LICENSE -->
 ## License
 
-Distributed under the [MIT License](https://github.com/Plutoberth/SonyHeadphonesClient/blob/master/LICENSE). See LICENSE for more information.
+Distributed under the [MIT License](LICENSE). See `LICENSE` for more information.
