@@ -12,7 +12,7 @@ pub const MINIMUM_VOICE_FOCUS_STEP: i32 = 2;
 pub const ASM_LEVEL_DISABLED: i8 = -1;
 pub const MAX_STEPS_WH_1000_XM3: i8 = 19;
 pub const MAX_STEPS_WH_1000_XM4: i8 = 20;
-pub const APP_VERSION: &str = "1.3.1";
+pub const APP_VERSION: &str = "2.0.0";
 pub const SERVICE_UUID: &str = "96CC203E-5068-46ad-B32D-E316F5E069BA";
 pub const SERVICE_UUID_IN_BYTES: [u8; 16] = [
     0x96, 0xcc, 0x20, 0x3e, 0x50, 0x68, 0x46, 0xad, 0xb3, 0x2d, 0xe3, 0x16, 0xf5, 0xe0, 0x69, 0xba,

@@ -17,7 +17,7 @@ use constants_rs::port::{
 use headphones_rs::port::Headphones;
 
 #[derive(Debug, Parser)]
-#[command(name = "sony-headphones-client", version = "1.3.1")]
+#[command(name = "sony-headphones-client", version)]
 #[command(about = "Sony Headphones Client (WH-1000-XM3 & WH-1000-XM4)")]
 pub struct Cli {
     #[command(subcommand)]
